@@ -16,7 +16,14 @@ namespace PhoneWordxPlatform
 		public MainPage()
 		{
 			this.Padding = new Thickness(20, Device.OnPlatform<double>(40, 20, 20), 20, 20);
+			StackLayout mainPanel = SetupMainView();
+			ConfigureHandlers();
 
+			this.Content = mainPanel;
+		}
+
+		StackLayout SetupMainView()
+		{
 			StackLayout panel = new StackLayout
 			{
 				VerticalOptions = LayoutOptions.FillAndExpand,
@@ -45,9 +52,25 @@ namespace PhoneWordxPlatform
 				Text = "Call",
 				IsEnabled = false
 			});
+			return panel;
+		}
 
+		void ConfigureHandlers()
+		{
 			translateButton.Clicked += OnTranslate;
-			this.Content = panel;
+			callButton.Clicked += OnCall;
+		}
+
+		async void OnCall(object sender, EventArgs e)
+		{
+			bool alertResponse = await this.DisplayAlert("Dial a Number", $"Call {translatedNumber}?", "Yes", "No");
+			if (alertResponse)
+			{
+				var dialer = DependencyService.Get<IDialer>();
+				if (dialer == null) return;
+
+				dialer.Dial(translatedNumber);
+			}
 		}
 
 		void OnTranslate(object sender, EventArgs e)
